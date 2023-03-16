@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 var host string
@@ -16,7 +18,14 @@ func main() {
 	flag.Parse()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("aaa")
+		date := time.Now().Format("2006-01-02 15:04:05.000")
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			fmt.Printf("%s | %7s | %s | error: %s\n", date, r.Method, r.URL.Path, err)
+			return
+		}
+		defer r.Body.Close()
+		fmt.Printf("%s | %7s | %s | %s\n", date, r.Method, r.RequestURI, string(body))
 		_, _ = w.Write([]byte("success"))
 	})
 
